@@ -1,0 +1,126 @@
+openapi: 3.0.0
+info:
+  title: Pub-Sub Project API
+  description: API para el patrón Publish-Subscribe con Spring Boot.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Servidor Local
+
+paths:
+  /publisher/hub:
+    post:
+      summary: Registrar un suscriptor
+      description: Registra un suscriptor proporcionando la URL de `callback` y una consulta opcional.
+      requestBody:
+        description: Datos para registrar un suscriptor.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Hub'
+      responses:
+        '200':
+          description: Suscriptor registrado con éxito.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ack'
+        '400':
+          description: Solicitud inválida.
+
+  /publisher/PurchaseRequest:
+    post:
+      summary: Crear una solicitud de compra
+      description: Recibe y procesa una solicitud de compra.
+      requestBody:
+        description: Datos de la solicitud de compra.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseRequest'
+      responses:
+        '200':
+          description: Solicitud de compra recibida.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ack'
+        '400':
+          description: Solicitud inválida.
+
+  /listener/responsePurchase:
+    post:
+      summary: Recibir respuesta de una solicitud de compra
+      description: Endpoint para que el suscriptor reciba respuestas procesadas desde el publicador.
+      requestBody:
+        description: Respuesta de la solicitud de compra.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseRequest'
+      responses:
+        '200':
+          description: Respuesta recibida con éxito.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ack'
+        '400':
+          description: Solicitud inválida.
+
+components:
+  schemas:
+    Ack:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Código de respuesta.
+        description:
+          type: string
+          description: Descripción de la respuesta.
+      example:
+        code: 200
+        description: "Operación exitosa"
+
+    Hub:
+      type: object
+      properties:
+        callback:
+          type: string
+          description: URL de callback del suscriptor.
+        query:
+          type: string
+          description: Consulta opcional para el registro.
+      example:
+        callback: "http://localhost:8081/listener/responsePurchase"
+        query: "some query"
+
+    PurchaseRequest:
+      type: object
+      properties:
+        provider:
+          type: string
+          description: Proveedor de la compra.
+        steelQuality:
+          type: string
+          description: Calidad del acero.
+        tons:
+          type: integer
+          description: Cantidad de toneladas.
+        price:
+          type: number
+          format: float
+          description: Precio total.
+        isUrgent:
+          type: boolean
+          description: Si la solicitud es urgente.
+      example:
+        provider: "Steel Supplier"
+        steelQuality: "A36"
+        tons: 50
+        price: 5000.0
+        isUrgent: false
